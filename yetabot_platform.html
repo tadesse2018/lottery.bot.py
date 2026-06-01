@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YetaBot — ዕጣ ፕላትፎርም</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#F5C518;--gold2:#E8A800;--dark:#0A0A0F;--dark2:#111118;--dark3:#1A1A24;
+  --card:#16161E;--border:#2A2A38;--text:#E8E8F0;--muted:#7070A0;--green:#00E676;--red:#FF4757;--blue:#00B4FF;
+}
+html{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.3;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(245,197,24,.08) 0%,transparent 70%);pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;min-height:100vh;max-width:1100px;margin:0 auto;padding:0 16px}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--gold);border-radius:8px;display:grid;place-items:center;font-size:18px}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.5px}
+.logo-text span{color:var(--gold)}
+.header-stats{display:flex;gap:20px}
+.hstat{text-align:center}
+.hstat-v{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--gold)}
+.hstat-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);padding:5px 12px;border-radius:20px;font-size:12px;color:var(--green)}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.tabs{display:flex;gap:4px;margin:20px 0;background:var(--dark3);padding:4px;border-radius:12px;border:1px solid var(--border)}
+.tab{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;border-radius:9px;cursor:pointer;transition:all .2s}
+.tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.tab:hover:not(.active){color:var(--text)}
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hero{text-align:center;padding:40px 0 32px}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.25);padding:5px 14px;border-radius:20px;font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(28px,6vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:12px}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--muted);font-size:15px;max-width:480px;margin:0 auto 28px;line-height:1.6}
+.lottery-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:20px;transition:border-color .2s}
+.lottery-card:hover{border-color:rgba(245,197,24,.3)}
+.lc-header{background:linear-gradient(135deg,rgba(245,197,24,.12),rgba(245,197,24,.04));padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.lc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px}
+.lc-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.badge-open{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3)}
+.badge-closed{background:rgba(255,71,87,.15);color:var(--red);border:1px solid rgba(255,71,87,.3)}
+.badge-drawn{background:rgba(245,197,24,.15);color:var(--gold);border:1px solid rgba(245,197,24,.3)}
+.lc-body{padding:20px 24px}
+.lc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.lc-stat{background:var(--dark3);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--border)}
+.lc-stat-v{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--gold)}
+.lc-stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+.lc-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:10px 20px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:7px}
+.btn-gold{background:var(--gold);color:#0A0A0F;font-weight:700}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,197,24,.35)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:rgba(255,71,87,.15);border:1px solid rgba(255,71,87,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(255,71,87,.25)}
+.btn-green{background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:var(--green)}
+.btn-green:hover{background:rgba(0,230,118,.25)}
+.btn-lg{padding:14px 28px;font-size:15px;border-radius:12px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;transition:border-color .2s;outline:none}
+.form-input:focus{border-color:var(--gold)}
+.form-input::placeholder{color:var(--muted)}
+.participant-row{display:flex;align-items:center;justify-content:space-between;background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;transition:all .2s}
+.participant-row.winner{border-color:var(--gold);background:rgba(245,197,24,.08);animation:winnerGlow 2s infinite}
+@keyframes winnerGlow{0%,100%{box-shadow:0 0 0 0 rgba(245,197,24,.3)}50%{box-shadow:0 0 12px 4px rgba(245,197,24,.2)}}
+.p-name{font-size:14px;display:flex;align-items:center;gap:8px}
+.p-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:grid;place-items:center;font-size:11px;font-weight:700;color:#000;flex-shrink:0}
+.draw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:none;place-items:center;backdrop-filter:blur(8px)}
+.draw-overlay.show{display:grid}
+.draw-box{background:var(--card);border:1px solid var(--gold);border-radius:24px;padding:40px;text-align:center;max-width:360px;width:90%;animation:scaleIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.draw-spinner{width:72px;height:72px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--gold);animation:spin 1s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.draw-title{font-family:'Syne',sans-serif;font-size:15px;color:var(--muted);margin-bottom:8px}
+.draw-name{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--gold);min-height:32px}
+.winner-trophy{font-size:56px;margin-bottom:12px;animation:bounce .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bounce{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:600px){.admin-grid{grid-template-columns:1fr}.header-stats{display:none}}
+.admin-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+.admin-card h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}
+.metric-big{font-family:'Syne',sans-serif;font-size:40px;font-weight:800}
+.metric-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.history-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.history-row:last-child{border-bottom:none}
+.h-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.h-info{flex:1}
+.h-title{font-size:14px;font-weight:500}
+.h-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.h-time{font-size:11px;color:var(--muted)}
+.notify{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:13px;z-index:2000;transform:translateX(120%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-width:280px;display:flex;align-items:center;gap:10px}
+.notify.show{transform:translateX(0)}
+.notify.success{border-color:rgba(0,230,118,.4)}
+.notify.error{border-color:rgba(255,71,87,.4)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:.5}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎰</div>
+    <div class="logo-text">Yeta<span>Bot</span></div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-v" id="hTotal">0</div><div class="hstat-l">ዕጣዎች</div></div>
+    <div class="hstat"><div class="hstat-v" id="hPart">0</div><div class="hstat-l">ተሳታፊ</div></div>
+    <div class="hstat"><div class="hstat-v" id="hWon">0</div><div class="hstat-l">አሸናፊዎች</div></div>
+  </div>
+  <div class="live-badge"><div class="live-dot"></div> Live</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('home')">🏠 ዋና</button>
+  <button class="tab" onclick="switchTab('create')">➕ አዲስ ዕጣ</button>
+  <button class="tab" onclick="switchTab('admin')">📊 Dashboard</button>
+  <button class="tab" onclick="switchTab('bot')">🤖 Bot Code</button>
+</div>
+
+<div id="tab-home" class="page active">
+  <div class="hero">
+    <div class="hero-tag">✦ ፕሮፌሽናል ዕጣ ፕላትፎርም</div>
+    <h1>ፈጣን፣ ታማኝ<br><span>ዕጣ ስርዓት</span></h1>
+    <p>ለቡድን giveaway፣ raffle እና ዕጣ ሁሉ — አንድ ፕሮፌሽናል ፕላትፎርም</p>
+    <button class="btn btn-gold btn-lg" onclick="switchTab('create')">➕ አዲስ ዕጣ ፍጠር</button>
+  </div>
+  <div id="lotteries-list"></div>
+</div>
+
+<div id="tab-create" class="page">
+  <div style="max-width:500px;margin:28px auto">
+    <div style="margin-bottom:28px">
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:6px">አዲስ ዕጣ ፍጠር</div>
+      <div style="font-size:14px;color:var(--muted)">ዕጣዎን ቅኑ እና ተሳታፊዎችን ያካትቱ</div>
+    </div>
+    <div class="lottery-card">
+      <div class="lc-body">
+        <div class="form-group"><label class="form-label">የዕጣ ስም *</label><input class="form-input" id="newTitle" placeholder="ለምሳሌ: iPhone 15 ዕጣ"/></div>
+        <div class="form-group"><label class="form-label">ሽልማት / ጉርሻ</label><input class="form-input" id="newPrize" placeholder="ለምሳሌ: 10,000 ብር"/></div>
+        <div class="form-group"><label class="form-label">ፈጣሪ ስም</label><input class="form-input" id="newCreator" placeholder="ስምዎ"/></div>
+        <div class="form-group"><label class="form-label">ቻናል / ቡድን</label><input class="form-input" id="newChannel" placeholder="@YourChannel"/></div>
+        <button class="btn btn-gold" style="width:100%;justify-content:center;padding:14px" onclick="createLottery()">🎰 ዕጣ ፍጠር</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-admin" class="page">
+  <div style="margin:24px 0 20px">
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px">Admin Dashboard</div>
+    <div style="font-size:13px;color:var(--muted)">ሁሉም ዕጣዎች እና ስታቲስቲክስ</div>
+  </div>
+  <div class="admin-grid">
+    <div class="admin-card"><h3>ጠቅላላ ዕጣ</h3><div class="metric-big" id="adminTotal">0</div><div class="metric-sub">አሁን ድረስ</div></div>
+    <div class="admin-card"><h3>ጠቅላላ ተሳታፊ</h3><div class="metric-big" style="color:var(--green)" id="adminPart">0</div><div class="metric-sub">ሁሉም ዕጣዎች</div></div>
+    <div class="admin-card"><h3>ክፍት ዕጣ</h3><div class="metric-big" style="color:var(--blue)" id="adminOpen">0</div><div class="metric-sub">አሁን ክፍት</div></div>
+    <div class="admin-card"><h3>አሸናፊዎች</h3><div class="metric-big" style="color:var(--gold)" id="adminWon">0</div><div class="metric-sub">የተመረጡ</div></div>
+  </div>
+  <div class="lottery-card">
+    <div class="lc-header"><div class="lc-title">📋 የዕጣ ታሪክ</div></div>
+    <div class="lc-body" id="historyList"></div>
+  </div>
+</div>
+
+<div id="tab-bot" class="page">
+  <div style="margin:24px 0 16px">
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px">🤖 Telegram Bot Code</div>
+    <div style="font-size:13px;color:var(--muted)">ለ Python + python-telegram-bot ዝግጁ ኮድ</div>
+  </div>
+  <div class="lottery-card">
+    <div class="lc-header" style="justify-content:space-between">
+      <div class="lc-title" style="font-size:14px">lottery_bot.py</div>
+      <button class="btn btn-outline" style="padding:6px 14px;font-size:12px" onclick="copyBotCode()">📋 ኮፒ</button>
+    </div>
+    <div class="lc-body" style="padding:0">
+      <pre id="botCodePre" style="background:var(--dark);padding:20px;font-size:11.5px;line-height:1.7;overflow-x:auto;color:#c9d1d9;border-radius:0 0 20px 20px;font-family:'Courier New',monospace;white-space:pre-wrap;word-break:break-all"></pre>
+    </div>
+  </div>
+  <div class="lottery-card" style="margin-top:16px">
+    <div class="lc-header"><div class="lc-title">⚡ Quick Setup</div></div>
+    <div class="lc-body">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="background:var(--dark);border-radius:10px;padding:14px;font-family:monospace;font-size:13px;color:var(--green)">$ pip install python-telegram-bot==20.7</div>
+        <div style="background:var(--dark);border-radius:10px;padding:14px;font-family:monospace;font-size:13px;color:var(--blue)">$ python lottery_bot.py</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          1. @BotFather ሄደው <b style="color:var(--text)">/newbot</b> ብለው ይፍጠሩ<br>
+          2. Token-ን ኮፒ ያድርጉ<br>
+          3. ፋይሉ ውስጥ <b style="color:var(--gold)">BOT_TOKEN</b> ቦታ ያስቀምጡ<br>
+          4. Bot run ያድርጉ ✅
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="draw-overlay" id="drawOverlay">
+  <div class="draw-box">
+    <div id="drawSpinner" class="draw-spinner"></div>
+    <div class="draw-title" id="drawTitle">አሸናፊ እየተመረጠ ነው...</div>
+    <div class="draw-name" id="drawName"></div>
+    <div id="drawWinnerSection" style="display:none">
+      <div class="winner-trophy">🏆</div>
+      <div style="font-family:'Syne',sans-serif;font-size:13px;color:var(--muted);margin-bottom:4px">አሸናፊ</div>
+      <div class="draw-name" id="drawWinnerName"></div>
+      <div style="font-size:12px;color:var(--muted);margin:8px 0 20px">እንኳን ደስ ይበልዎ! 🎉</div>
+      <button class="btn btn-gold" onclick="closeDrawOverlay()">✓ ዝጋ</button>
+    </div>
+  </div>
+</div>
+
+<div class="notify" id="notify"><span id="notifyIcon">✓</span><span id="notifyText"></span></div>
+
+<script>
+let lotteries = JSON.parse(localStorage.getItem('yetabot_lotteries') || '[]');
+let currentDraw = null;
+
+function save() { localStorage.setItem('yetabot_lotteries', JSON.stringify(lotteries)); updateStats(); }
+
+function updateStats() {
+  const total = lotteries.length;
+  const parts = lotteries.reduce((s,l) => s + l.participants.length, 0);
+  const won = lotteries.filter(l => l.winner).length;
+  const open = lotteries.filter(l => l.active).length;
+  ['hTotal','adminTotal'].forEach(id => document.getElementById(id).textContent = total);
+  ['hPart','adminPart'].forEach(id => document.getElementById(id).textContent = parts);
+  ['hWon','adminWon'].forEach(id => document.getElementById(id).textContent = won);
+  document.getElementById('adminOpen').textContent = open;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['home','create','admin','bot'][i] === name);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name === 'home') renderLotteries();
+  if (name === 'admin') renderAdmin();
+  if (name === 'bot') renderBotCode();
+}
+
+function createLottery() {
+  const title = document.getElementById('newTitle').value.trim();
+  const prize = document.getElementById('newPrize').value.trim();
+  const creator = document.getElementById('newCreator').value.trim() || 'Admin';
+  const channel = document.getElementById('newChannel').value.trim();
+  if (!title) { notify('⚠️ የዕጣ ስም ያስፈልጋል!', 'error'); return; }
+  lotteries.unshift({ id: Date.now(), title, prize, creator, channel,
+    participants: [], active: true, winner: null,
+    createdAt: new Date().toLocaleString('am-ET') });
+  save();
+  document.getElementById('newTitle').value = '';
+  document.getElementById('newPrize').value = '';
+  document.getElementById('newChannel').value = '';
+  notify('✅ ዕጣ ተፈጠረ!', 'success');
+  switchTab('home');
+}
+
+function joinLottery(id) {
+  const lot = lotteries.find(l => l.id === id);
+  if (!lot || !lot.active) return;
+  const names = ['አቤበ','ሰለሞን','ዮሐንስ','ሚካኤል','ዳዊት','ሩት','ሀና','ሰናይት','ብርሃን','ጥሩነሽ','ፍቅረ','ቤዛ'];
+  const name = names[Math.floor(Math.random()*names.length)] + ' ' + (Math.random()*100|0);
+  if (lot.participants.length >= 50) { notify('⚠️ ዕጣ ተሞልቷል!', 'error'); return; }
+  lot.participants.push({ id: Date.now(), name });
+  save(); renderLotteries();
+  notify(`🎟 ${name} ተሳትፈዋል!`, 'success');
+}
+
+function drawWinner(id) {
+  const lot = lotteries.find(l => l.id === id);
+  if (!lot || !lot.participants.length) { notify('😶 ተሳታፊ የለም!', 'error'); return; }
+  currentDraw = lot;
+  const overlay = document.getElementById('drawOverlay');
+  document.getElementById('drawSpinner').style.display = 'block';
+  document.getElementById('drawTitle').style.display = 'block';
+  document.getElementById('drawName').style.display = 'block';
+  document.getElementById('drawWinnerSection').style.display = 'none';
+  overlay.classList.add('show');
+  const nameEl = document.getElementById('drawName');
+  const interval = setInterval(() => {
+    const rnd = lot.participants[Math.floor(Math.random()*lot.participants.length)];
+    nameEl.textContent = rnd.name;
+    nameEl.style.color = `hsl(${Math.random()*60+30},80%,60%)`;
+  }, 120);
+  setTimeout(() => {
+    clearInterval(interval);
+    const winner = lot.participants[Math.floor(Math.random()*lot.participants.length)];
+    lot.winner = winner.name; lot.active = false;
+    save(); renderLotteries();
+    document.getElementById('drawSpinner').style.display = 'none';
+    document.getElementById('drawTitle').style.display = 'none';
+    document.getElementById('drawName').style.display = 'none';
+    document.getElementById('drawWinnerName').textContent = winner.name;
+    document.getElementById('drawWinnerSection').style.display = 'block';
+  }, 2800);
+}
+
+function closeDrawOverlay() {
+  document.getElementById('drawOverlay').classList.remove('show');
+  notify(`🏆 ${currentDraw?.winner} አሸናፊ ሆነ!`, 'success');
+}
+
+function deleteLottery(id) {
+  lotteries = lotteries.filter(l => l.id !== id);
+  save(); renderLotteries();
+  notify('🗑 ዕጣ ተሰርዟል', 'success');
+}
+
+function reopen(id) {
+  const lot = lotteries.find(l => l.id === id);
+  if (!lot) return;
+  lot.active = true; lot.winner = null;
+  save(); renderLotteries();
+  notify('🟢 ዕጣ እንደገና ተከፈተ', 'success');
+}
+
+function renderLotteries() {
+  const el = document.getElementById('lotteries-list');
+  if (!lotteries.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🎰</div><p>ምንም ዕጣ የለም። አዲስ ዕጣ ፍጠር!</p></div>`; return;
+  }
+  el.innerHTML = lotteries.map(lot => {
+    const badge = lot.winner ? 'badge-drawn' : (lot.active ? 'badge-open' : 'badge-closed');
+    const status = lot.winner ? '🏆 ተወስኗል' : (lot.active ? '🟢 ክፍት' : '🔴 ዝግ');
+    const parts = lot.participants.slice(-5).map(p =>
+      `<div class="participant-row ${lot.winner === p.name ? 'winner' : ''}">
+        <div class="p-name"><div class="p-avatar">${p.name[0]}</div>${p.name}</div>
+        ${lot.winner === p.name ? '<span style="color:var(--gold)">🏆</span>' : ''}
+      </div>`).join('');
+    return `<div class="lottery-card">
+      <div class="lc-header">
+        <div>
+          <div class="lc-title">${lot.title}</div>
+          ${lot.prize ? `<div style="font-size:12px;color:var(--gold);margin-top:3px">🎁 ${lot.prize}</div>` : ''}
+        </div>
+        <span class="lc-badge ${badge}">${status}</span>
+      </div>
+      <div class="lc-body">
+        <div class="lc-meta">
+          <div class="lc-stat"><div class="lc-stat-v">${lot.participants.length}</div><div class="lc-stat-l">ተሳታፊ</div></div>
+          <div class="lc-stat"><div class="lc-stat-v" style="font-size:13px">${lot.creator}</div><div class="lc-stat-l">ፈጣሪ</div></div>
+          <div class="lc-stat"><div class="lc-stat-v" style="font-size:11px">${lot.createdAt.split(',')[0]}</div><div class="lc-stat-l">ቀን</div></div>
+        </div>
+        ${lot.winner ? `<div style="background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.3);border-radius:12px;padding:12px;text-align:center;margin-bottom:16px">
+          <div style="font-size:12px;color:var(--muted)">አሸናፊ</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--gold)">🏆 ${lot.winner}</div>
+        </div>` : ''}
+        ${lot.participants.length ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">የቅርብ ተሳታፊዎች</div>${parts}` : ''}
+        <div class="lc-actions" style="margin-top:14px">
+          ${lot.active ? `
+            <button class="btn btn-gold" onclick="joinLottery(${lot.id})">🎟 ተሳተፍ</button>
+            <button class="btn btn-green" onclick="drawWinner(${lot.id})">🎲 አሸናፊ ምረጥ</button>
+          ` : `<button class="btn btn-outline" onclick="reopen(${lot.id})">🔄 እንደገና ክፈት</button>`}
+          <button class="btn btn-danger" onclick="deleteLottery(${lot.id})">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAdmin() {
+  updateStats();
+  const el = document.getElementById('historyList');
+  if (!lotteries.length) { el.innerHTML = `<div class="empty" style="padding:24px"><div class="empty-icon">📋</div><p>ታሪክ የለም</p></div>`; return; }
+  el.innerHTML = lotteries.map(lot => `
+    <div class="history-row">
+      <div class="h-icon" style="background:${lot.winner ? 'rgba(245,197,24,.15)' : lot.active ? 'rgba(0,230,118,.15)' : 'rgba(112,112,160,.1)'}">
+        ${lot.winner ? '🏆' : lot.active ? '🟢' : '🔴'}
+      </div>
+      <div class="h-info">
+        <div class="h-title">${lot.title}</div>
+        <div class="h-sub">${lot.participants.length} ተሳታፊ${lot.winner ? ' · አሸናፊ: ' + lot.winner : ''}</div>
+      </div>
+      <div class="h-time">${lot.createdAt}</div>
+    </div>`).join('');
+}
+
+const BOT_CODE = `#!/usr/bin/env python3
+"""
+🎰 YetaBot - Professional Telegram Lottery
+pip install python-telegram-bot==20.7
+"""
+import random, asyncio
+from datetime import datetime
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+
+BOT_TOKEN = "YOUR_TOKEN_HERE"  # @BotFather ከሚሰጥዎ
+lotteries = {}
+
+def get_kb(cid):
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton("🎟 ተሳተፍ", callback_data=f"join:{cid}"),
+        InlineKeyboardButton("👥 ዝርዝር", callback_data=f"list:{cid}"),
+    ]])
+
+async def start(u, c):
+    await u.message.reply_text(
+        "🎰 *YetaBot ወደ እንኳን!*\\n\\n"
+        "/newlottery \`ስም\` — ዕጣ ፍጠር\\n"
+        "/draw — አሸናፊ ምረጥ\\n"
+        "/status — ሁኔታ\\n"
+        "/participants — ተሳታፊዎች\\n"
+        "/reset — ሰርዝ", parse_mode="Markdown")
+
+async def new_lottery(u, c):
+    cid = u.effective_chat.id
+    if lotteries.get(cid, {}).get("active"):
+        await u.message.reply_text("⚠️ ክፍት ዕጣ አለ። /reset ያድርጉ።"); return
+    title = " ".join(c.args) if c.args else "🎰 ዕጣ"
+    lotteries[cid] = {"title": title, "creator": u.effective_user.full_name,
+        "participants": {}, "active": True, "winner": None,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M")}
+    await u.message.reply_text(
+        f"🎉 *{title}*\\n👥 ለመሳተፍ ከታች ጠቅ ያድርጉ!",
+        parse_mode="Markdown", reply_markup=get_kb(cid))
+
+async def button(u, c):
+    q = u.callback_query; await q.answer()
+    action, cid = q.data.split(":"); cid = int(cid)
+    lot = lotteries.get(cid)
+    if not lot or not lot["active"]:
+        await q.answer("❌ ዕጣ ተዘግቷል", show_alert=True); return
+    if action == "join":
+        uid = q.from_user.id
+        if uid in lot["participants"]:
+            await q.answer("✅ አስቀድሞ ተመዝግበዋል!", show_alert=True); return
+        lot["participants"][uid] = q.from_user.full_name
+        await q.answer(f"🎟 ተሳትፈዋል! ({len(lot['participants'])} ተሳታፊ)", show_alert=True)
+        try: await q.edit_message_reply_markup(reply_markup=get_kb(cid))
+        except: pass
+    elif action == "list":
+        ns = list(lot["participants"].values())
+        msg = "\\n".join(f"{i+1}. {n}" for i, n in enumerate(ns)) if ns else "😶 ማንም አልተሳተፈም"
+        await q.answer(msg, show_alert=True)
+
+async def draw(u, c):
+    cid = u.effective_chat.id; lot = lotteries.get(cid)
+    if not lot: await u.message.reply_text("❌ ዕጣ የለም። /newlottery ይጠቀሙ"); return
+    if not lot["participants"]: await u.message.reply_text("😶 ማንም አልተሳተፈም!"); return
+    msg = await u.message.reply_text("🥁 አሸናፊ እየተመረጠ ነው...")
+    for t in ["🎲 ስሞች እየተቀላቀሉ...", "⏳ ትንሽ ቆዩ..."]:
+        await asyncio.sleep(1); await msg.edit_text(t)
+    await asyncio.sleep(1)
+    wid, wname = random.choice(list(lot["participants"].items()))
+    lot["winner"] = wname; lot["active"] = False
+    await msg.edit_text(
+        f"🏆 *አሸናፊ: {wname}*\\n\\n"
+        f"📋 ዕጣ: {lot['title']}\\n"
+        f"👥 {len(lot['participants'])} ሰው ከተሳተፉ\\n\\n"
+        "🎉 እንኳን ደስ ይበልዎ!", parse_mode="Markdown")
+
+async def status(u, c):
+    cid = u.effective_chat.id; lot = lotteries.get(cid)
+    if not lot: await u.message.reply_text("ℹ️ ዕጣ የለም። /newlottery ይጠቀሙ"); return
+    s = "🟢 ክፍት" if lot["active"] else "🔴 ዝግ"
+    t = f"*{lot['title']}*\\n👤 {lot['creator']}\\n👥 {len(lot['participants'])} ተሳታፊ\\n{s}"
+    if lot["winner"]: t += f"\\n🏆 አሸናፊ: {lot['winner']}"
+    await u.message.reply_text(t, parse_mode="Markdown",
+        reply_markup=get_kb(cid) if lot["active"] else None)
+
+async def participants(u, c):
+    cid = u.effective_chat.id; lot = lotteries.get(cid)
+    ns = list((lot or {}).get("participants", {}).values())
+    if not ns: await u.message.reply_text("😶 ምንም ተሳታፊ የለም"); return
+    await u.message.reply_text(
+        "*👥 ተሳታፊዎች:*\\n" + "\\n".join(f"  {i+1}. {n}" for i, n in enumerate(ns)),
+        parse_mode="Markdown")
+
+async def reset(u, c):
+    cid = u.effective_chat.id
+    lotteries.pop(cid, None)
+    await u.message.reply_text("🗑 ዕጣ ተሰርዟል። /newlottery ለአዲስ ዕጣ።")
+
+def main():
+    app = Application.builder().token(BOT_TOKEN).build()
+    for cmd, fn in [
+        ("start", start), ("help", start),
+        ("newlottery", new_lottery), ("draw", draw),
+        ("status", status), ("participants", participants), ("reset", reset)
+    ]:
+        app.add_handler(CommandHandler(cmd, fn))
+    app.add_handler(CallbackQueryHandler(button, pattern=r"^(join|list):"))
+    print("🚀 YetaBot running! Ctrl+C ለማቆም")
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
+`;
+
+function renderBotCode() {
+  document.getElementById('botCodePre').textContent = BOT_CODE;
+}
+
+function copyBotCode() {
+  navigator.clipboard.writeText(BOT_CODE).then(() => notify('📋 ኮድ ተቀድቷል!', 'success'));
+}
+
+let notifyTimer;
+function notify(msg, type='success') {
+  const el = document.getElementById('notify');
+  document.getElementById('notifyText').textContent = msg;
+  el.className = `notify show ${type}`;
+  clearTimeout(notifyTimer);
+  notifyTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Demo seed
+if (!lotteries.length) {
+  lotteries = [
+    { id:1, title:"iPhone 15 Pro ዕጣ", prize:"iPhone 15 Pro", creator:"YetaBot Admin", channel:"@demo",
+      participants:[{id:1,name:"አቤበ ተስፋ"},{id:2,name:"ሰለሞን ዘ"},{id:3,name:"ሀና ምህረት"},{id:4,name:"ዳዊት ብ"},{id:5,name:"ሩት ኪ"}],
+      active:true, winner:null, createdAt:new Date().toLocaleString('am-ET') },
+    { id:2, title:"10,000 ብር Cash Giveaway", prize:"10,000 ብር", creator:"Demo", channel:"@test",
+      participants:[{id:6,name:"ብርሃን አሰ"},{id:7,name:"ፍቅረ ወ"}],
+      active:false, winner:"ብርሃን አሰ", createdAt:new Date(Date.now()-86400000).toLocaleString('am-ET') }
+  ];
+  save();
+}
+renderLotteries();
+updateStats();
+</script>
+</body>
+</html>
